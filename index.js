@@ -180,6 +180,12 @@ app.get('/:module', cors(), function(req, res){
 				m.npm = 'http://npmjs.org/package/' + m.name;
 				m.repository = m.repository || {url:'http://asdf'};
 				m.bugs = m.bugs || {url:'http://asdf'},
+				
+				m.dep = [];
+				for(dep in m.dependencies) {
+					m.dep.push(dep + '@' + m.dependencies[dep]);
+				}
+				m.dep.join('\n');
 
 				// autobots assemble
 				conf.rows.push([
@@ -192,7 +198,7 @@ app.get('/:module', cors(), function(req, res){
 					{text: m.repository.url, href: m.repository.url},
 					{text: m.bugs.url, href: m.bugs.url},
 					m.preferGlobal,
-					m.dependencies,
+					m.dep,
 					m.license
 				]);
 			});
@@ -229,7 +235,8 @@ app.get('/:module', cors(), function(req, res){
 		logger.info('########################################');
 
 		// send back the json request
-	    res.jsonp(results);
+		// use modules not results
+	    res.jsonp(modules);
 	});
 
 });
