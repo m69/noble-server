@@ -8,7 +8,7 @@
   },
   "author": "Johnathan Iannotti",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "normalize-package-data": "~1.0.3",
     "request": "~2.53.0",
     "cors": "~2.5.3",

@@ -28,6 +28,7 @@ app.get('/:module', cors(), function(req, res){
 	var modCount = 0;
 	var modTotal = 0;
 	var timestamp = Date.now();
+	var hostname = 'http://' + req.headers.host;
 	var registry = 'http://registry.npmjs.org/';
   	var url = registry + req.params.module;
 
@@ -213,7 +214,11 @@ app.get('/:module', cors(), function(req, res){
 
 			logger.info('Exported: ' + filename);
 
-	    	callback(null);
+			var downloadUrl = {
+				report: hostname + '/report/' + filename
+			};
+
+	    	callback(null, downloadUrl);
 	    }
 	],
 	function(err, results){
@@ -235,10 +240,33 @@ app.get('/:module', cors(), function(req, res){
 		logger.info('########################################');
 
 		// send back the json request
-		// use modules not results
-	    res.jsonp(modules);
+	    res.jsonp(results);
 	});
 
+});
+
+// handle requests to download reports
+app.get('/report/:name', function (req, res, next) {
+	
+	var options = {
+		root: __dirname + '/reports/',
+		dotfiles: 'deny',
+		headers: {
+			'x-timestamp': Date.now(),
+			'x-sent': true
+		}
+	};
+
+	var fileName = req.params.name;
+		res.sendFile(fileName, options, function (err) {
+		if (err) {
+			logger.error(err);
+			res.status(err.status).end();
+		}
+		else {
+			logger.info('Sent File: ' + fileName);
+		}
+	});
 });
 
 app.listen(port);
