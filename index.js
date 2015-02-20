@@ -176,10 +176,10 @@ app.get('/:module', cors(), function(req, res){
 			modules.forEach(function(m) {
 
 				// the what ifs
-				m.homepage = m.homepage || 'asdf';
+				m.homepage = m.homepage || '';
 				m.npm = 'http://npmjs.org/package/' + m.name;
-				m.repository = m.repository || {url:'http://asdf'};
-				m.bugs = m.bugs || {url:'http://asdf'},
+				m.repository = m.repository || {url:''};
+				m.bugs = m.bugs || {url:''},
 				
 				m.dep = [];
 				for(dep in m.dependencies) {
@@ -193,7 +193,7 @@ app.get('/:module', cors(), function(req, res){
 					m.version,
 					m._id,
 					m.description,
-					m.homepage,
+					{text: m.homepage, href: m.homepage},
 					{text: m.npm, href: m.npm},
 					{text: m.repository.url, href: m.repository.url},
 					{text: m.bugs.url, href: m.bugs.url},
