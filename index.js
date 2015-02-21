@@ -16,9 +16,32 @@ logger.setLevel('INFO');
 var app = express();
 var port = process.env.PORT || 6900;
 
+app.get('/get/:module', cors(), function(req, res) {
+	//TODO: handle the favicon thing?
+	if(req.params.module === 'favicon.ico') {return};
+
+	var registry = 'http://registry.npmjs.org/';
+  	var url = registry + req.params.module;
+
+  	if(req.query.version){
+		url += '/' + req.query.version.toString().replace(/\^/g,'');
+	}
+
+	logger.info('NPM Request: '+ url);
+
+	request.get({url:url, json:true}, function(err, resp, body) {
+
+		// build a new module
+		var mod = createNodeModule(body);
+		
+		// return the module
+		res.jsonp(mod.getData());
+
+	});
+});
 
 // listen for requests
-app.get('/:module', cors(), function(req, res){
+app.get('/resolve/:module', cors(), function(req, res) {
 
 	//TODO: handle the favicon thing?
 	if(req.params.module === 'favicon.ico') {return};
@@ -180,13 +203,16 @@ app.get('/:module', cors(), function(req, res){
 				m.homepage = m.homepage || '';
 				m.npm = 'http://npmjs.org/package/' + m.name;
 				m.repository = m.repository || {url:''};
-				m.bugs = m.bugs || {url:''},
+				m.bugs = m.bugs || {url:''};
+				m.dep = '';
 				
-				m.dep = [];
+				var temp = [];
 				for(dep in m.dependencies) {
-					m.dep.push(dep + '@' + m.dependencies[dep]);
+						temp.push(dep + '@' + m.dependencies[dep]);
+					}
+				if(temp.length > 0) {
+					m.dep = temp.join(',\n');
 				}
-				m.dep.join('\n');
 
 				// autobots assemble
 				conf.rows.push([
@@ -229,7 +255,7 @@ app.get('/:module', cors(), function(req, res){
 		if(errors.length){
 			logger.info('Found Errors: ' + errors.length);
 			for(error in errors) {
-				logger.error(error);
+				logger.error(errors[error]);
 			}
 		}
 
