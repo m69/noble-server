@@ -14,9 +14,9 @@ var logger = log4js.getLogger();
 log4js.replaceConsole();
 logger.setLevel('INFO');
 var app = express();
-var port = process.env.PORT || 6900;
+var port = process.env.PORT || 6901;
 
-app.get('/get/:module', cors(), function(req, res) {
+app.get('/retrieve/:module', cors(), function(req, res) {
 	//TODO: handle the favicon thing?
 	if(req.params.module === 'favicon.ico') {return};
 
@@ -57,6 +57,8 @@ app.get('/resolve/:module', cors(), function(req, res) {
 
 	if(req.query.version){
 		url += '/' + req.query.version.toString().replace(/\^/g,'');
+	}else{
+		url += '/latest';
 	}
 
   	logger.info('NPM Request: '+ url);
@@ -259,14 +261,26 @@ app.get('/resolve/:module', cors(), function(req, res) {
 			}
 		}
 
-		logger.info('Resolved Modules: ' + (modTotal === 0 ? 1 : modTotal));
+		var resolvedModules = modTotal === 0 ? 1 : modTotal
+		logger.info('Resolved Modules: ' + resolvedModules);
 
 		var timeDiff = Date.now() - timestamp;
-		logger.info('Total Time: ' +  timeDiff / 1000 + 's');
+		var totalTime = timeDiff / 1000 + 's';
+		logger.info('Total Time: ' +  totalTime);
 		logger.info('########################################');
 
+		var requestData = {
+			modules: modules,
+			report: results[1].report,
+			stats: {
+				resolved: resolvedModules,
+				totalTime: totalTime,
+				errors: errors
+			}
+		}
+
 		// send back the json request
-	    res.jsonp(results);
+	    res.jsonp(requestData);
 	});
 
 });
