@@ -202,6 +202,10 @@ app.get('/resolve/:module', cors(), function(req, res) {
 					type:'string'
 				},
 				{
+					caption:'Vulnerabilities',
+					type:'string'
+				},
+				{
 					caption:'Homepage',
 					type:'hyperlink',
 				},
@@ -256,6 +260,7 @@ app.get('/resolve/:module', cors(), function(req, res) {
 					m.version,
 					m._id,
 					m.description,
+					m.secFlag,
 					{text: m.homepage, href: m.homepage},
 					{text: m.npm, href: m.npm},
 					{text: m.repository.url, href: m.repository.url},
@@ -312,9 +317,9 @@ app.get('/resolve/:module', cors(), function(req, res) {
 			vulnerabilities: security,
 			stats: {
 				resolved: resolvedModules,
+				vulnerabilities: security.length,
 				totalTime: totalTime,
 				timestamp: timestamp,
-				securityHits: security.length,
 				errors: errors,
 			}
 		}
