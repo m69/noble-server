@@ -5,6 +5,7 @@ var express = require('express');
 var async = require('async');
 var log4js = require('log4js');
 var nodeExcel = require('excel-export-impr');
+var nspAPI = require('nsp-api');
 var fs = require('fs');
 
 // local
@@ -27,15 +28,21 @@ app.get('/retrieve/:module', cors(), function(req, res) {
 		url += '/' + req.query.version.toString().replace(/\^/g,'');
 	}
 
-	logger.info('NPM Request: '+ url);
+	logger.info('NPM Retrieve Request: '+ url);
 
 	request.get({url:url, json:true}, function(err, resp, body) {
 
-		// build a new module
-		var mod = createNodeModule(body);
-		
-		// return the module
-		res.jsonp(mod.getData());
+		if(!err && resp.statusCode == 200) {
+
+			// build a new module
+			var mod = createNodeModule(body);
+
+			// return the module
+			res.jsonp(mod.getData());
+
+		}else{
+			res.jsonp(err);
+		}
 
 	});
 });
@@ -48,6 +55,7 @@ app.get('/resolve/:module', cors(), function(req, res) {
 
 	var modules = [];
 	var errors = [];
+	var security = [];
 	var modCount = 0;
 	var modTotal = 0;
 	var timestamp = Date.now();
@@ -61,7 +69,7 @@ app.get('/resolve/:module', cors(), function(req, res) {
 		url += '/latest';
 	}
 
-  	logger.info('NPM Request: '+ url);
+  	logger.info('NPM Resolve Request: '+ url);
 
 	async.series([
     	function(callback){
@@ -247,6 +255,32 @@ app.get('/resolve/:module', cors(), function(req, res) {
 			};
 
 	    	callback(null, downloadUrl);
+	    },
+	    function(callback) {
+
+	   //  	modules.forEach(mod in modules) {
+
+	   //  		// security check
+	   //  		nspAPI.validateModule(mod.name, mod.version, function(err, results) {
+
+				//  //    if(typeof results === 'string') {
+				//  //    	console.log('string');
+				//  //    }
+
+				// 	if(Object.prototype.toString.call( results ) === '[object Array]' ) {
+				// 		security.push(results);
+				// 		mod.secFlag = true;
+				// 	}
+
+				// 	console.log(results);
+
+				// 	// return the module
+				// 	res.jsonp(mod.getData());
+
+				// });
+	   //  	}
+
+			callback(null);
 	    }
 	],
 	function(err, results){
