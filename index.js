@@ -155,6 +155,32 @@ app.get('/resolve/:module', cors(), function(req, res) {
 	    },
 	    function(callback) {
 
+	    	// reset counter
+	    	modCount = 0;
+
+	    	modules.forEach(function(m) {
+	    		++modCount;
+
+	    		// security check
+	    		nspAPI.validateModule(m.name, m.version, function(err, results) {
+
+	    			--modCount;
+
+					if(Object.prototype.toString.call(results) === '[object Array]' && results.length !== 0) {
+						security.push(results);
+						m.secFlag = true;
+					}
+
+					if(modCount === 0){
+						callback(null, security);
+					}
+
+				});
+
+			});
+	    },
+	    function(callback) {
+
 	    	logger.info('Exporting...');
 
 	    	var conf ={};
@@ -255,32 +281,6 @@ app.get('/resolve/:module', cors(), function(req, res) {
 			};
 
 	    	callback(null, downloadUrl);
-	    },
-	    function(callback) {
-
-	   //  	modules.forEach(mod in modules) {
-
-	   //  		// security check
-	   //  		nspAPI.validateModule(mod.name, mod.version, function(err, results) {
-
-				//  //    if(typeof results === 'string') {
-				//  //    	console.log('string');
-				//  //    }
-
-				// 	if(Object.prototype.toString.call( results ) === '[object Array]' ) {
-				// 		security.push(results);
-				// 		mod.secFlag = true;
-				// 	}
-
-				// 	console.log(results);
-
-				// 	// return the module
-				// 	res.jsonp(mod.getData());
-
-				// });
-	   //  	}
-
-			callback(null);
 	    }
 	],
 	function(err, results){
@@ -298,18 +298,24 @@ app.get('/resolve/:module', cors(), function(req, res) {
 		var resolvedModules = modTotal === 0 ? 1 : modTotal
 		logger.info('Resolved Modules: ' + resolvedModules);
 
+		logger.info('Vulnerabilities: ' + security.length);
+
 		var timeDiff = Date.now() - timestamp;
 		var totalTime = timeDiff / 1000 + 's';
 		logger.info('Total Time: ' +  totalTime);
+		logger.info('Timestamp: ' +  timestamp);
 		logger.info('########################################');
 
 		var requestData = {
 			modules: modules,
 			report: results[1].report,
+			vulnerabilities: security,
 			stats: {
 				resolved: resolvedModules,
 				totalTime: totalTime,
-				errors: errors
+				timestamp: timestamp,
+				securityHits: security.length,
+				errors: errors,
 			}
 		}
 
