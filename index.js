@@ -72,6 +72,7 @@ app.get('/resolve/:module', cors(), function(req, res) {
   	logger.info('NPM Resolve Request: '+ url);
 
 	async.series([
+		// our main workhorse
     	function(callback){
 
     		logger.info('Resolving dependencies...');
@@ -153,6 +154,7 @@ app.get('/resolve/:module', cors(), function(req, res) {
 			});
 	     
 	    },
+	    // this is our security bit 
 	    function(callback) {
 
 	    	// reset counter
@@ -169,6 +171,7 @@ app.get('/resolve/:module', cors(), function(req, res) {
 					if(Object.prototype.toString.call(results) === '[object Array]' && results.length !== 0) {
 						security.push(results);
 						m.secFlag = true;
+						m.vulnerabilities = results;
 					}
 
 					if(modCount === 0){
@@ -179,6 +182,7 @@ app.get('/resolve/:module', cors(), function(req, res) {
 
 			});
 	    },
+	    // exporting
 	    function(callback) {
 
 	    	logger.info('Exporting...');
@@ -245,7 +249,22 @@ app.get('/resolve/:module', cors(), function(req, res) {
 				m.repository = m.repository || {url:''};
 				m.bugs = m.bugs || {url:''};
 				m.dep = '';
+
+				// lets format these pesky things
+				m.vulnerabilities = m.vulnerabilities || [];
+				var v = '';
+				m.vulnerabilities.forEach(function(hit){
+					if(hit.length > 0) {
+						hit.forEach(function(subHit){
+							//TODO string huh?
+							v = v + 'https://nodesecurity.io/advisories/module/' + subHit.url + ' \n';
+						});
+					}else if(hit.url) {
+						v = v + 'https://nodesecurity.io/advisories/module/' + hit.url + ' \n';
+					}
+				});
 				
+				// just for reference
 				var temp = [];
 				for(dep in m.dependencies) {
 						temp.push(dep + '@' + m.dependencies[dep]);
@@ -260,7 +279,7 @@ app.get('/resolve/:module', cors(), function(req, res) {
 					m.version,
 					m._id,
 					m.description,
-					m.secFlag,
+					v,
 					{text: m.homepage, href: m.homepage},
 					{text: m.npm, href: m.npm},
 					{text: m.repository.url, href: m.repository.url},
@@ -288,6 +307,7 @@ app.get('/resolve/:module', cors(), function(req, res) {
 	    	callback(null, downloadUrl);
 	    }
 	],
+	// final callback function
 	function(err, results){
 
 		logger.info('Completed');
@@ -300,32 +320,33 @@ app.get('/resolve/:module', cors(), function(req, res) {
 			}
 		}
 
+		// lets put together some nifty stats
 		var resolvedModules = modTotal === 0 ? 1 : modTotal
 		logger.info('Resolved Modules: ' + resolvedModules);
-
 		logger.info('Vulnerabilities: ' + security.length);
-
 		var timeDiff = Date.now() - timestamp;
 		var totalTime = timeDiff / 1000 + 's';
 		logger.info('Total Time: ' +  totalTime);
 		logger.info('Timestamp: ' +  timestamp);
 		logger.info('########################################');
 
-		var requestData = {
+		// build our response
+		var nobleResponse = {
 			modules: modules,
 			report: results[1].report,
 			vulnerabilities: security,
 			stats: {
 				resolved: resolvedModules,
-				vulnerabilities: security.length,
+				securityHits: security.length,
 				totalTime: totalTime,
 				timestamp: timestamp,
 				errors: errors,
+				mod: 'be noble.'
 			}
 		}
 
 		// send back the json request
-	    res.jsonp(requestData);
+	    res.jsonp(nobleResponse);
 	});
 
 });
