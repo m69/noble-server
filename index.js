@@ -333,8 +333,8 @@ app.get('/resolve/:module', cors(), function(req, res) {
 		// build our response
 		var nobleResponse = {
 			modules: modules,
-			report: results[1].report,
 			vulnerabilities: security,
+			report: results[2].report,
 			stats: {
 				resolved: resolvedModules,
 				securityHits: security.length,
