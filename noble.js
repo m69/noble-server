@@ -250,6 +250,10 @@ app.get('/resolve/:module', cors(), function(req, res) {
 				m.bugs = m.bugs || {url:''};
 				m.dep = '';
 
+				if(typeof m.license === 'object' && m.license.type !== 'undefined') {
+					m.license = m.license.type;
+				}
+
 				// lets format these pesky things
 				m.vulnerabilities = m.vulnerabilities || [];
 				var v = '';
