@@ -1,6 +1,6 @@
 {
   "name": "noble-server",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Noble server",
   "main": "noble.js",
   "scripts": {
@@ -11,6 +11,12 @@
   },
   "author": "Johnathan Iannotti",
   "license": "MIT",
+  "homepage": "https://github.com/m69/noble-server",
+  "bugs": {
+    "url": "https://github.com/m69/noble-server/issues",
+    "email": "john@johnforhire.com"
+  },
+  "preferGlobal": true,
   "dependencies": {
     "async": "~0.9.0",
     "cors": "~2.5.3",
