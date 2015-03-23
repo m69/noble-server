@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // 3p
 var request = require('request');
 var cors = require('cors');
