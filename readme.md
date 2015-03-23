@@ -1,7 +1,7 @@
-# Noble
+# Noble Server
 ### The NPM proxy and node.js dependency reporter.
 
-Noble is a server-side API that exposes several methods to proxy an npm cors request or resolve and report all of a node module's dependencies. It was crafted out of the need to work with the npm API to resolve dependencies and perform vulnerability scans. Then, smash everything together into an excel report.
+Noble Server is a server-side API that exposes several methods to proxy an npm cors request or resolve and report all of a node module's dependencies. It was crafted out of the need to work with the npm API to resolve dependencies and perform vulnerability scans. Then, smash everything together into an excel report.
 
 ###Installation:
 
